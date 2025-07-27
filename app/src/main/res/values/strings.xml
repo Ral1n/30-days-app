@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">30-days-app</string>
+
+    <string name="stock_title1">Alphabet Inc.</string>
+    <string name="stock_title2">Apple</string>
+    <string name="stock_title3">AMD</string>
+    <string name="stock_title4">Nvidia</string>
+    <string name="stock_title5">Tesla</string>
+
+    <string name="stock_description1">Alphabet is the world\'s third-largest technology company by revenue, after Amazon and Apple, the largest technology company by profit, and one of the world\'s most valuable companies.</string>
+    <string name="stock_description2">Apple Inc. is an American multinational corporation and technology company headquartered in Cupertino, California, in Silicon Valley. It is best known for its consumer electronics, software, and services.</string>
 </resources>
