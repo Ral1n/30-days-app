@@ -1,5 +1,7 @@
 package com.example.a30_days_app
 
+import android.content.ClipData
+import android.hardware.biometrics.PromptContentItemBulletedText
 import android.os.Bundle
 import android.util.Log
 import android.widget.Space
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +33,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
@@ -42,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.a30_days_app.data.Datasource
 import com.example.a30_days_app.model.Stock
 import com.example.a30_days_app.ui.theme.BebasNeue
 import com.example.a30_days_app.ui.theme.GoogleSans
@@ -49,6 +52,10 @@ import com.example.a30_days_app.ui.theme.Monda
 import com.example.a30_days_app.ui.theme.Monserrat
 import com.example.a30_days_app.ui.theme._30daysappTheme
 import java.nio.file.WatchEvent
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.font.Font
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,12 +64,23 @@ class MainActivity : ComponentActivity() {
         setContent {
             _30daysappTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    StockCard(
-                        stock = Stock(symbol = "GOOGL", titleId = R.string.stock_title1, imageResourceId = R.drawable.google, descriptionId = R.string.stock_description1),
+                    StockOfTheDayApp(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun StockOfTheDayApp(modifier: Modifier = Modifier){
+    _30daysappTheme {
+        Scaffold { paddingValues ->
+            StockList(
+                stockList = Datasource().loadStocks(),
+                modifier = Modifier.padding(paddingValues)
+            )
         }
     }
 }
@@ -110,18 +128,33 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
         ),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(16.dp)
             .height(200.dp)
     ){
         Column {
-            Text(
-                text = stringResource(stock.titleId),
-                style = MaterialTheme.typography.headlineMedium,
-                fontFamily = Monserrat,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(8.dp)
-            )
+            Row (
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Text(
+                    text = stringResource(stock.titleId),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontFamily = Monserrat,
+                    fontWeight = FontWeight.Bold,
+//                    modifier = Modifier.padding(8.dp)
+                )
+
+                Text(
+                    text = " (${stock.symbol})",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontFamily = Monserrat,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.align(Alignment.Bottom)
+                        .padding(bottom = 0.dp, top = 0.dp)
+                )
+            }
 
             Row (
                 horizontalArrangement = Arrangement.Center,
@@ -132,63 +165,75 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                 Image(
                     painter = painterResource(stock.imageResourceId),
                     contentDescription = null,
-                    modifier = Modifier.size(width = 160.dp, height = 160.dp)
-                        .padding(8.dp)
+                    modifier = Modifier
+                        .size(width = 160.dp, height = 160.dp)
+                        .padding(4.dp)
                 )
 
-                Row (
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically,
+                Column (
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ){
-                    Column (
-                        verticalArrangement = Arrangement.SpaceEvenly,
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Row (
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically,
                     ){
-                        Text(
-                            text = "price \ntoday",
-                            fontFamily = Monserrat,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier
-                        )
+                        Spacer(modifier = Modifier.weight(1f))
 
-                        Text(
-                            text = closePrice?: "...",
-                            fontFamily = BebasNeue,
-                            fontSize = 32.sp,
-                        )
+                        Column (
+                            verticalArrangement = Arrangement.SpaceEvenly,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ){
+                            Text(
+                                text = "price \ntoday",
+                                fontFamily = Monserrat,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier
+                            )
+
+                            Text(
+                                text = closePrice?: "...",
+                                fontFamily = BebasNeue,
+                                fontSize = 32.sp,
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Column (
+                            verticalArrangement = Arrangement.SpaceEvenly,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ){
+                            Text(
+                                text = "5 years \ngrowth",
+                                fontFamily = Monserrat,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier
+                            )
+
+                            Text(
+                                text = "17%",
+                                fontFamily = BebasNeue,
+                                fontSize = 32.sp,
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
                     }
 
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    Column (
-                        verticalArrangement = Arrangement.SpaceEvenly,
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ){
-                        Text(
-                            text = "5 years \ngrowth",
-                            fontFamily = Monserrat,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier
-                        )
-
-                        Text(
-                            text = "17%",
-                            fontFamily = BebasNeue,
-                            fontSize = 32.sp,
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = "*the presented data was retrieved using Alpha Vantage API",
+                        fontFamily = Monserrat,
+                        fontSize = 6.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                    )
                 }
-
-                Spacer(modifier = Modifier.weight(1f))
-
 
 
                 Spacer(modifier = Modifier.weight(1f))
             }
         }
-
 
 //        Text(
 //            text = stringResource(stock.descriptionId),
@@ -198,10 +243,19 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
     }
 }
 
+@Composable
+private fun StockList(stockList: List<Stock>, modifier: Modifier = Modifier){
+    LazyColumn {
+        items(stockList){ stock ->
+            StockCard(stock)
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun StockCardPreview() {
     _30daysappTheme {
-        StockCard(Stock(symbol = "GOOGL", titleId = R.string.stock_title1, imageResourceId = R.drawable.google, descriptionId = R.string.stock_description1))
+        StockOfTheDayApp()
     }
 }
