@@ -38,3 +38,15 @@ val Typography = Typography(
 val BebasNeue = FontFamily(
     Font(R.font.bebas_neue_regular)
 )
+
+val Monda = FontFamily(
+    Font(R.font.monda_variable_font_wght)
+)
+
+val GoogleSans = FontFamily(
+    Font(R.font.google_sans_code)
+)
+
+val Monserrat = FontFamily(
+    Font(R.font.montserrat)
+)

@@ -5,6 +5,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 
 class Stock (
+    val symbol: String,
     @StringRes val titleId: Int,
     @DrawableRes val imageResourceId: Int,
     @StringRes val descriptionId: Int
