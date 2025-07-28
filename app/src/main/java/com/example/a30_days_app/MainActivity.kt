@@ -11,7 +11,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -49,13 +51,22 @@ import com.example.a30_days_app.model.Stock
 import com.example.a30_days_app.ui.theme.BebasNeue
 import com.example.a30_days_app.ui.theme.GoogleSans
 import com.example.a30_days_app.ui.theme.Monda
-import com.example.a30_days_app.ui.theme.Monserrat
 import com.example.a30_days_app.ui.theme._30daysappTheme
 import java.nio.file.WatchEvent
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.text.font.Font
+import com.example.a30_days_app.ui.theme.LightGrayBackground
+import com.example.a30_days_app.ui.theme.RedColor
+import com.example.a30_days_app.ui.theme.Secondary
+import com.example.a30_days_app.ui.theme.interFamily
+import com.example.a30_days_app.ui.theme.labelText
+import com.example.a30_days_app.ui.theme.montserratFamily
+import com.example.a30_days_app.ui.theme.onPrimary
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,13 +85,19 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun StockOfTheDayApp(modifier: Modifier = Modifier){
+fun StockOfTheDayApp(modifier: Modifier = Modifier) {
     _30daysappTheme {
         Scaffold { paddingValues ->
-            StockList(
-                stockList = Datasource().loadStocks(),
-                modifier = Modifier.padding(paddingValues)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(LightGrayBackground)
+            ) {
+                StockList(
+                    stockList = Datasource().loadStocks(),
+                    modifier = Modifier.padding(paddingValues)
+                )
+            }
         }
     }
 }
@@ -120,45 +137,53 @@ suspend fun calculate5YearsGrowth(stock: Stock): String? {
 fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
     var closePrice by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         closePrice = getLatestClosePriceForLastDay(stock)
     }
 
-    Card (
+    ElevatedCard(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp
+        ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = Color.White
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
-            .height(200.dp)
-    ){
+            .padding(16.dp, 8.dp)
+//            .height(200.dp)
+    ) {
         Column {
-            Row (
+            Row(
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ){
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(16.dp, 8.dp)
+            ) {
                 Text(
                     text = stringResource(stock.titleId),
                     style = MaterialTheme.typography.headlineMedium,
-                    fontFamily = Monserrat,
-                    fontWeight = FontWeight.Bold,
-//                    modifier = Modifier.padding(8.dp)
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.ExtraBold,
+//                  modifier = Modifier.padding(8.dp)
                 )
 
                 Text(
                     text = " (${stock.symbol})",
                     style = MaterialTheme.typography.headlineSmall,
-                    fontFamily = Monserrat,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.align(Alignment.Bottom)
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.Normal,
+                    modifier = Modifier
+                        .align(Alignment.Bottom)
                         .padding(bottom = 0.dp, top = 0.dp)
                 )
             }
 
-            Row (
+            Spacer(modifier = Modifier.weight(1f))
+
+            Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(8.dp)
             ) {
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -166,72 +191,102 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                     painter = painterResource(stock.imageResourceId),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(width = 160.dp, height = 160.dp)
+                        .size(width = 96.dp, height = 96.dp)
                         .padding(4.dp)
                 )
 
-                Column (
+                Column(
                     verticalArrangement = Arrangement.SpaceEvenly,
                     horizontalAlignment = Alignment.CenterHorizontally
-                ){
-                    Row (
+                ) {
+                    Row(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically,
-                    ){
+                    ) {
                         Spacer(modifier = Modifier.weight(1f))
 
-                        Column (
+                        Column(
                             verticalArrangement = Arrangement.SpaceEvenly,
                             horizontalAlignment = Alignment.CenterHorizontally,
-                        ){
+                        ) {
                             Text(
-                                text = "price \ntoday",
-                                fontFamily = Monserrat,
-                                fontWeight = FontWeight.SemiBold,
+                                text = "price today",
+                                fontFamily = interFamily,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 14.sp,
+                                color = labelText,
                                 modifier = Modifier
                             )
 
                             Text(
-                                text = closePrice?: "...",
-                                fontFamily = BebasNeue,
-                                fontSize = 32.sp,
+                                text = closePrice ?: "...",
+                                fontFamily = interFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 30.sp,
+                                color = onPrimary
                             )
                         }
 
                         Spacer(modifier = Modifier.weight(1f))
 
-                        Column (
+                        Column(
                             verticalArrangement = Arrangement.SpaceEvenly,
                             horizontalAlignment = Alignment.CenterHorizontally,
-                        ){
+                        ) {
                             Text(
-                                text = "5 years \ngrowth",
-                                fontFamily = Monserrat,
-                                fontWeight = FontWeight.SemiBold,
+                                text = "5 years growth",
+                                fontFamily = interFamily,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 14.sp,
+                                color = labelText,
                                 modifier = Modifier
                             )
 
                             Text(
                                 text = "17%",
-                                fontFamily = BebasNeue,
-                                fontSize = 32.sp,
+                                fontFamily = interFamily,
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 30.sp,
+                                color = onPrimary
                             )
                         }
 
                         Spacer(modifier = Modifier.weight(1f))
                     }
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     Text(
                         text = "*the presented data was retrieved using Alpha Vantage API",
-                        fontFamily = Monserrat,
-                        fontSize = 6.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 7.5.sp,
+                        color = labelText,
+                        lineHeight = 14.sp,
                         modifier = Modifier
                     )
                 }
 
 
                 Spacer(modifier = Modifier.weight(1f))
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Surface(
+                    color = Secondary,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Description",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                        color = onPrimary,
+                        modifier = Modifier.padding(16.dp, 8.dp)
+                    )
+                }
             }
         }
 
@@ -244,9 +299,11 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun StockList(stockList: List<Stock>, modifier: Modifier = Modifier){
-    LazyColumn {
-        items(stockList){ stock ->
+private fun StockList(stockList: List<Stock>, modifier: Modifier = Modifier) {
+    LazyColumn(
+//        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(stockList) { stock ->
             StockCard(stock)
         }
     }
@@ -256,6 +313,12 @@ private fun StockList(stockList: List<Stock>, modifier: Modifier = Modifier){
 @Composable
 fun StockCardPreview() {
     _30daysappTheme {
-        StockOfTheDayApp()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(LightGrayBackground)
+        ) {
+            StockOfTheDayApp()
+        }
     }
 }
