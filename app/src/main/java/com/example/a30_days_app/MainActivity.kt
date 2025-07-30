@@ -1,15 +1,11 @@
 package com.example.a30_days_app
 
-import android.content.ClipData
-import android.hardware.biometrics.PromptContentItemBulletedText
+import android.icu.util.Calendar
 import android.os.Bundle
 import android.util.Log
-import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,10 +19,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,36 +31,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.a30_days_app.data.Datasource
 import com.example.a30_days_app.model.Stock
-import com.example.a30_days_app.ui.theme.BebasNeue
-import com.example.a30_days_app.ui.theme.GoogleSans
-import com.example.a30_days_app.ui.theme.Monda
 import com.example.a30_days_app.ui.theme._30daysappTheme
-import java.nio.file.WatchEvent
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.modifier.modifierLocalOf
-import androidx.compose.ui.text.font.Font
 import com.example.a30_days_app.ui.theme.LightGrayBackground
-import com.example.a30_days_app.ui.theme.RedColor
 import com.example.a30_days_app.ui.theme.Secondary
 import com.example.a30_days_app.ui.theme.interFamily
 import com.example.a30_days_app.ui.theme.labelText
-import com.example.a30_days_app.ui.theme.montserratFamily
 import com.example.a30_days_app.ui.theme.onPrimary
+import retrofit2.http.Tag
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,43 +88,44 @@ fun StockOfTheDayApp(modifier: Modifier = Modifier) {
     }
 }
 
-suspend fun getLatestClosePriceForLastDay(stock: Stock): String? {
-    val response = StockApi.stockService.getStock(
+suspend fun getStockPriceToday(stock: Stock): String? {
+    val response = StockApiPriceToday.priceTodayStockService.getStock(
         symbol = stock.symbol,
-        apikey = "81ZQS5CDRLQ52ZV1",
+        apikey = "MZtuw0KjRdgz4LW7lyunuYzvdgsfWH3t"
     )
 
-    if (response.timeSeries == null) {
-        return null
-    }
-
-    return response.timeSeries.values.firstOrNull()?.get("4. close")
+    return String.format("%.2f", response.firstOrNull()?.price)
 }
 
-suspend fun calculate5YearsGrowth(stock: Stock): String? {
-    val response = StockApi.stockService.getStock(
+suspend fun calculateGrowthOver5y(stock: Stock): String? {
+    val response = StockApiPrice5yAgo.price5yAgoStockService.getStock(
         symbol = stock.symbol,
-        apikey = "81ZQS5CDRLQ52ZV1",
+        apikey = "MZtuw0KjRdgz4LW7lyunuYzvdgsfWH3t"
     )
 
-    if (response.timeSeries == null) {
-        return null
-    }
+    val stockPriceToday: Double = getStockPriceToday(stock)!!.toDouble()
+    val stockPrice5yAgo: Double = response.lastOrNull()!!.price
 
-    //TODO - De obtinut pretul de acum 5 ani din aceasi zi
+    val growthPercentage = (stockPriceToday - stockPrice5yAgo) * 100 / stockPrice5yAgo
 
-    //TODO - De calculat procentul cu care a crescut
-    //TODO - x = todayPrice - 5yearsAgoPrice
-    //TODO - procent = x * 100 / 5yearsAgoPrice
-    return null
+    return String.format("%.2f", growthPercentage)
 }
 
 @Composable
 fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
-    var closePrice by remember { mutableStateOf<String?>(null) }
+    var stockPriceToday by remember { mutableStateOf<String?>("") }
+    var stockGrowthOver5y by remember { mutableStateOf<String?>("") }
 
     LaunchedEffect(Unit) {
-        closePrice = getLatestClosePriceForLastDay(stock)
+        Log.d("STOCK", "Fetching price for ${stock.symbol}")
+        stockPriceToday = getStockPriceToday(stock)
+        Log.d("STOCK", "Received price: $stockPriceToday")
+    }
+
+    LaunchedEffect(Unit) {
+        Log.d("STOCK", "Fetching price for ${stock.symbol}")
+        stockGrowthOver5y = calculateGrowthOver5y(stock)
+        Log.d("STOCK", "Received growth: $stockGrowthOver5y")
     }
 
     ElevatedCard(
@@ -219,10 +206,14 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                             )
 
                             Text(
-                                text = closePrice ?: "...",
+                                text = if (stockPriceToday.isNullOrEmpty()) {
+                                    "..."
+                                } else {
+                                    "$${stockPriceToday}"
+                                },
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 30.sp,
+                                fontSize = 26.sp,
                                 color = onPrimary
                             )
                         }
@@ -243,10 +234,14 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                             )
 
                             Text(
-                                text = "17%",
+                                text = if (stockGrowthOver5y.isNullOrEmpty()) {
+                                    "..."
+                                } else {
+                                    "$stockGrowthOver5y%"
+                                },
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 30.sp,
+                                fontSize = 26.sp,
                                 color = onPrimary
                             )
                         }
@@ -257,7 +252,7 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "*the presented data was retrieved using Alpha Vantage API",
+                        text = "*the presented data was retrieved using Financial Modeling Prep API",
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 7.5.sp,
@@ -313,12 +308,6 @@ private fun StockList(stockList: List<Stock>, modifier: Modifier = Modifier) {
 @Composable
 fun StockCardPreview() {
     _30daysappTheme {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(LightGrayBackground)
-        ) {
-            StockOfTheDayApp()
-        }
+        StockOfTheDayApp()
     }
 }

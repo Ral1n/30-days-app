@@ -3,22 +3,44 @@ package com.example.a30_days_app
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
+import java.util.Date
 
-interface StockService {
-    @GET("query")
+interface PriceTodayStockService {
+    @GET("quote-short")
     suspend fun getStock(
-        @Query("function") function: String = "TIME_SERIES_DAILY",
         @Query("symbol") symbol: String,
         @Query("apikey") apikey: String,
-    ): StockResponse
+    ): List<PriceTodayStockResponse>
 }
 
-object StockApi {
+interface Price5yAgoStockService {
+    @GET("historical-price-eod/light")
+    suspend fun getStock(
+        @Query("symbol") symbol: String,
+//        @Query("from") from: String,
+        @Query("apikey") apikey: String,
+    ): List<Price5yAgoStockResponse>
+}
+
+object StockApiPriceToday {
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://www.alphavantage.co/")
+        .baseUrl("https://financialmodelingprep.com/stable/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 
-    val stockService: StockService = retrofit.create(StockService::class.java)
+    val priceTodayStockService: PriceTodayStockService =
+        retrofit.create(PriceTodayStockService::class.java)
 }
+
+object StockApiPrice5yAgo {
+    private val retrofit = Retrofit.Builder()
+        .baseUrl("https://financialmodelingprep.com/stable/")
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+
+    val price5yAgoStockService: Price5yAgoStockService =
+        retrofit.create(Price5yAgoStockService::class.java)
+}
+
