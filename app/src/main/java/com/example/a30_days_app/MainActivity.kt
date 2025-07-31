@@ -1,13 +1,20 @@
 package com.example.a30_days_app
 
+import android.content.ClipDescription
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.StringRes
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,9 +49,24 @@ import com.example.a30_days_app.model.Stock
 import com.example.a30_days_app.ui.theme._30daysappTheme
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Label
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.layout.ModifierInfo
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.text.font.FontStyle
+import com.example.a30_days_app.model.stocks
 import com.example.a30_days_app.ui.theme.LightGrayBackground
 import com.example.a30_days_app.ui.theme.Secondary
 import com.example.a30_days_app.ui.theme.interFamily
@@ -72,16 +94,16 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun StockOfTheDayApp(modifier: Modifier = Modifier) {
-    _30daysappTheme {
-        Scaffold { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(LightGrayBackground)
-            ) {
-                StockList(
-                    stockList = Datasource().loadStocks(),
-                    modifier = Modifier.padding(paddingValues)
+    Scaffold(
+        topBar = {
+            AppTopBar()
+        }
+    ) { it ->
+        LazyColumn(contentPadding = it) {
+            items(stocks) {
+                StockCard(
+                    stock = it,
+                    modifier = Modifier.padding(4.dp)
                 )
             }
         }
@@ -116,6 +138,8 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
     var stockPriceToday by remember { mutableStateOf<String?>("") }
     var stockGrowthOver5y by remember { mutableStateOf<String?>("") }
 
+    var expanded by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         Log.d("STOCK", "Fetching price for ${stock.symbol}")
         stockPriceToday = getStockPriceToday(stock)
@@ -138,9 +162,15 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp, 8.dp)
-//            .height(200.dp)
     ) {
-        Column {
+        Column(
+            modifier = Modifier.animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
+            )
+        ) {
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
@@ -151,7 +181,6 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                     style = MaterialTheme.typography.headlineMedium,
                     fontFamily = interFamily,
                     fontWeight = FontWeight.ExtraBold,
-//                  modifier = Modifier.padding(8.dp)
                 )
 
                 Text(
@@ -266,42 +295,104 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            Row(
+
+            Surface(
+                color = Secondary,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Surface(
-                    color = Secondary,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Description",
-                        fontFamily = interFamily,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp,
-                        color = onPrimary,
-                        modifier = Modifier.padding(16.dp, 8.dp)
-                    )
+                Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Description",
+                            fontFamily = interFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 14.sp,
+                            color = onPrimary,
+                            modifier = Modifier.padding(16.dp, 8.dp)
+                        )
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        IconButton(
+                            onClick = {
+                                expanded = !expanded
+                            },
+                            modifier = Modifier
+                        ) {
+                            Icon(
+                                imageVector = if (expanded) {
+                                    Icons.Filled.ExpandLess
+                                } else {
+                                    Icons.Filled.ExpandMore
+                                },
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.size(width = 20.dp, height = 20.dp)
+                            )
+                        }
+                    }
+
+                    if (expanded) {
+                        Text(
+                            text = stringResource(stock.descriptionId),
+                            fontFamily = interFamily,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 12.sp,
+                            color = labelText,
+                            modifier = Modifier.padding(16.dp, 0.dp)
+                        )
+                    }
                 }
             }
         }
-
-//        Text(
-//            text = stringResource(stock.descriptionId),
-//            style = MaterialTheme.typography.bodyMedium,
-//            modifier = Modifier.padding(16.dp)
-//        )
     }
 }
 
 @Composable
-private fun StockList(stockList: List<Stock>, modifier: Modifier = Modifier) {
-    LazyColumn(
-//        verticalArrangement = Arrangement.spacedBy(16.dp)
+fun StockDescription(
+    @StringRes stockDescription: Int,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = Modifier
     ) {
-        items(stockList) { stock ->
-            StockCard(stock)
-        }
+        Text(
+            text = stringResource(stockDescription),
+            fontFamily = interFamily,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
+        )
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppTopBar(modifier: Modifier = Modifier) {
+    CenterAlignedTopAppBar(
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.google),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(width = 32.dp, height = 32.dp)
+                        .padding(8.dp)
+                )
+
+                Text(
+                    text = "Stock of the day",
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 30.sp
+                )
+            }
+        },
+        modifier = Modifier
+    )
 }
 
 @Preview(showBackground = true)
