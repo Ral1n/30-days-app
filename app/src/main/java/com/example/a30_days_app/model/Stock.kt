@@ -20,16 +20,16 @@ val stocks = listOf<Stock>(
         imageResourceId = R.drawable.google,
         descriptionId = R.string.stock_description1
     ),
-    Stock(
-        symbol = "AAPL",
-        titleId = R.string.stock_title2,
-        imageResourceId = R.drawable.apple,
-        descriptionId = R.string.stock_description2
-    ),
-    Stock(
-        symbol = "AMD",
-        titleId = R.string.stock_title3,
-        imageResourceId = R.drawable.amd,
-        descriptionId = R.string.stock_description3
-    ),
+//    Stock(
+//        symbol = "AAPL",
+//        titleId = R.string.stock_title2,
+//        imageResourceId = R.drawable.apple,
+//        descriptionId = R.string.stock_description2
+//    ),
+//    Stock(
+//        symbol = "AMD",
+//        titleId = R.string.stock_title3,
+//        imageResourceId = R.drawable.amd,
+//        descriptionId = R.string.stock_description3
+//    ),
 )

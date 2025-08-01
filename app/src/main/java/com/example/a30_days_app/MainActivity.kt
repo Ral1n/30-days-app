@@ -44,7 +44,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.a30_days_app.data.Datasource
 import com.example.a30_days_app.model.Stock
 import com.example.a30_days_app.ui.theme._30daysappTheme
 import androidx.compose.foundation.lazy.items
@@ -67,11 +66,13 @@ import androidx.compose.ui.layout.ModifierInfo
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.font.FontStyle
 import com.example.a30_days_app.model.stocks
+import com.example.a30_days_app.ui.theme.GreenColor
 import com.example.a30_days_app.ui.theme.LightGrayBackground
 import com.example.a30_days_app.ui.theme.Secondary
 import com.example.a30_days_app.ui.theme.interFamily
 import com.example.a30_days_app.ui.theme.labelText
 import com.example.a30_days_app.ui.theme.onPrimary
+import kotlinx.coroutines.delay
 import retrofit2.http.Tag
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -141,15 +142,9 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
     var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        Log.d("STOCK", "Fetching price for ${stock.symbol}")
         stockPriceToday = getStockPriceToday(stock)
-        Log.d("STOCK", "Received price: $stockPriceToday")
-    }
-
-    LaunchedEffect(Unit) {
-        Log.d("STOCK", "Fetching price for ${stock.symbol}")
+        delay(1000)
         stockGrowthOver5y = calculateGrowthOver5y(stock)
-        Log.d("STOCK", "Received growth: $stockGrowthOver5y")
     }
 
     ElevatedCard(
@@ -266,12 +261,12 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                                 text = if (stockGrowthOver5y.isNullOrEmpty()) {
                                     "..."
                                 } else {
-                                    "$stockGrowthOver5y%"
+                                    "+$stockGrowthOver5y%"
                                 },
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 26.sp,
-                                color = onPrimary
+                                color = GreenColor
                             )
                         }
 
@@ -281,10 +276,10 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "*the presented data was retrieved using Financial Modeling Prep API",
+                        text = "* the presented data was retrieved using Financial Modeling Prep API",
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 7.5.sp,
+                        fontSize = 10.sp,
                         color = labelText,
                         lineHeight = 14.sp,
                         modifier = Modifier
@@ -350,44 +345,29 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun StockDescription(
-    @StringRes stockDescription: Int,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = Modifier
-    ) {
-        Text(
-            text = stringResource(stockDescription),
-            fontFamily = interFamily,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 16.sp,
-        )
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTopBar(modifier: Modifier = Modifier) {
     CenterAlignedTopAppBar(
         title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Image(
-                    painter = painterResource(R.drawable.google),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(width = 32.dp, height = 32.dp)
-                        .padding(8.dp)
-                )
-
                 Text(
                     text = "Stock of the day",
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 30.sp
+                    fontSize = 30.sp,
+                )
+
+                Text(
+                    text = "Yesterday shows you why. Today is your chance.",
+                    fontFamily = interFamily,
+                    fontWeight = FontWeight.SemiBold,
+                    fontStyle = FontStyle.Italic,
+                    fontSize = 16.sp,
+                    color = onPrimary
                 )
             }
         },

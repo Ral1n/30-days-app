@@ -8,6 +8,17 @@
     <string name="stock_title5">Tesla, Inc.</string>
     <string name="stock_title6">Amazon</string>
     <string name="stock_title7">Meta Platforms</string>
+    <string name="stock_title8">Microsoft</string>
+    <string name="stock_title9">Amazon</string>
+    <string name="stock_title10">Visa Inc.</string>
+    <string name="stock_title11">Mastercard</string>
+    <string name="stock_title12">Netflix</string>
+    <string name="stock_title13">PepsiCo</string>
+    <string name="stock_title14">Coca-Cola</string>
+    <string name="stock_title15">Walmart</string>
+    <string name="stock_title16">Berkshire Hathaway</string>
+    <string name="stock_title17">JPMorgan Chase</string>
+
 
     <string name="stock_description1">Alphabet is the world\'s third-largest technology company by revenue, after Amazon and Apple, the largest technology company by profit, and one of the world\'s most valuable companies.</string>
     <string name="stock_description2">Apple Inc. is an American multinational corporation and technology company headquartered in Cupertino, California, in Silicon Valley. It is best known for its consumer electronics, software, and services.</string>
