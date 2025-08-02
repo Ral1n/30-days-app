@@ -44,7 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.a30_days_app.model.Stock
+import com.example.a30_days_app.data.Stock
 import com.example.a30_days_app.ui.theme._30daysappTheme
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
@@ -66,7 +66,7 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.layout.ModifierInfo
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.font.FontStyle
-import com.example.a30_days_app.model.stocks
+import com.example.a30_days_app.data.stocks
 import com.example.a30_days_app.ui.theme.dark_theme_primary
 import com.example.a30_days_app.ui.theme.interFamily
 import com.example.a30_days_app.ui.theme.positiveGrowthTextColor

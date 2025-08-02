@@ -14,9 +14,8 @@ val light_theme_tertiary = Color(0xFF6a7282)
 val dark_theme_primary = Color.Black
 val dark_theme_onPrimary = Color.White
 val dark_theme_secondary = Color(0xFF060507)
-val dark_theme_onSecondary = Color(0xFFB0C609)
-val dark_theme_tertiary = Color(0xFF959D7D)
-
+val dark_theme_onSecondary = Color(0xFF4f39f6)
+val dark_theme_tertiary = Color(0xFFB0B3B8)
 
 val positiveGrowthTextColor = Color(0xFF00a63e)
 val negativeGrowthTextColor = Color(0xFFe7000b)
