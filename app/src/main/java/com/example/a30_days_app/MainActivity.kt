@@ -60,18 +60,16 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Label
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.layout.ModifierInfo
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.font.FontStyle
 import com.example.a30_days_app.model.stocks
-import com.example.a30_days_app.ui.theme.GreenColor
-import com.example.a30_days_app.ui.theme.LightGrayBackground
-import com.example.a30_days_app.ui.theme.Secondary
+import com.example.a30_days_app.ui.theme.dark_theme_primary
 import com.example.a30_days_app.ui.theme.interFamily
-import com.example.a30_days_app.ui.theme.labelText
-import com.example.a30_days_app.ui.theme.onPrimary
+import com.example.a30_days_app.ui.theme.positiveGrowthTextColor
 import kotlinx.coroutines.delay
 import retrofit2.http.Tag
 import java.text.SimpleDateFormat
@@ -83,10 +81,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             _30daysappTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    StockOfTheDayApp(
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Surface(
+                    color = MaterialTheme.colorScheme.background,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    StockOfTheDayApp()
                 }
             }
         }
@@ -128,6 +127,7 @@ suspend fun calculateGrowthOver5y(stock: Stock): String? {
 
     val stockPriceToday: Double = getStockPriceToday(stock)!!.toDouble()
     val stockPrice5yAgo: Double = response.lastOrNull()!!.price
+    Log.d("STOCK", "5yAgoPrice: $stockPrice5yAgo")
 
     val growthPercentage = (stockPriceToday - stockPrice5yAgo) * 100 / stockPrice5yAgo
 
@@ -152,7 +152,7 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
             defaultElevation = 2.dp
         ),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.primary
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -176,6 +176,7 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                     style = MaterialTheme.typography.headlineMedium,
                     fontFamily = interFamily,
                     fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
 
                 Text(
@@ -183,6 +184,7 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                     style = MaterialTheme.typography.headlineSmall,
                     fontFamily = interFamily,
                     fontWeight = FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier
                         .align(Alignment.Bottom)
                         .padding(bottom = 0.dp, top = 0.dp)
@@ -224,8 +226,8 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                                 text = "price today",
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.Medium,
-                                fontSize = 14.sp,
-                                color = labelText,
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.tertiary,
                                 modifier = Modifier
                             )
 
@@ -237,8 +239,8 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                                 },
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 26.sp,
-                                color = onPrimary
+                                fontSize = 20.sp,
+                                color = MaterialTheme.colorScheme.onSecondary,
                             )
                         }
 
@@ -252,8 +254,8 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                                 text = "5 years growth",
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.Medium,
-                                fontSize = 14.sp,
-                                color = labelText,
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.tertiary,
                                 modifier = Modifier
                             )
 
@@ -265,8 +267,8 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                                 },
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 26.sp,
-                                color = GreenColor
+                                fontSize = 20.sp,
+                                color = positiveGrowthTextColor
                             )
                         }
 
@@ -279,8 +281,8 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                         text = "* the presented data was retrieved using Financial Modeling Prep API",
                         fontFamily = interFamily,
                         fontWeight = FontWeight.SemiBold,
-                        fontSize = 10.sp,
-                        color = labelText,
+                        fontSize = 9.sp,
+                        color = MaterialTheme.colorScheme.tertiary,
                         lineHeight = 14.sp,
                         modifier = Modifier
                     )
@@ -292,7 +294,7 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
 
 
             Surface(
-                color = Secondary,
+                color = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column {
@@ -304,7 +306,7 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                             fontFamily = interFamily,
                             fontWeight = FontWeight.Medium,
                             fontSize = 14.sp,
-                            color = onPrimary,
+                            color = MaterialTheme.colorScheme.onSecondary,
                             modifier = Modifier.padding(16.dp, 8.dp)
                         )
 
@@ -323,7 +325,7 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                                     Icons.Filled.ExpandMore
                                 },
                                 contentDescription = null,
-                                tint = Color.Black,
+                                tint = MaterialTheme.colorScheme.onSecondary,
                                 modifier = Modifier.size(width = 20.dp, height = 20.dp)
                             )
                         }
@@ -335,8 +337,13 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                             fontFamily = interFamily,
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 12.sp,
-                            color = labelText,
-                            modifier = Modifier.padding(16.dp, 0.dp)
+                            color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.padding(
+                                top = 0.dp,
+                                bottom = 16.dp,
+                                start = 16.dp,
+                                end = 16.dp
+                            )
                         )
                     }
                 }
@@ -355,30 +362,45 @@ fun AppTopBar(modifier: Modifier = Modifier) {
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
-                    text = "Stock of the day",
+                    text = "STOCK OF THE DAY",
                     fontFamily = interFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 30.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 28.sp,
+                    color = MaterialTheme.colorScheme.onPrimary,
                 )
 
                 Text(
-                    text = "Yesterday shows you why. Today is your chance.",
+                    text = "Five years can change everything. Start today.",
                     fontFamily = interFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    fontStyle = FontStyle.Italic,
-                    fontSize = 16.sp,
-                    color = onPrimary
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.tertiary,
                 )
             }
         },
-        modifier = Modifier
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.background
+        ),
+        modifier = Modifier.padding(top = 16.dp)
     )
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
-fun StockCardPreview() {
-    _30daysappTheme {
+fun LightStockOfTheDayAppPreview() {
+    _30daysappTheme(
+        darkTheme = false,
+    ) {
+        StockOfTheDayApp()
+    }
+}
+
+@Preview
+@Composable
+fun DarkStockOfTheDayAppPreview() {
+    _30daysappTheme(
+        darkTheme = true,
+    ) {
         StockOfTheDayApp()
     }
 }

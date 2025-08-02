@@ -2,20 +2,23 @@ package com.example.a30_days_app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val light_theme_background = Color(0xFFF3F4F6)
+val dark_theme_background = Color(0xFF0C0D0F)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val light_theme_primary = Color.White
+val light_theme_onPrimary = Color.Black
+val light_theme_secondary = Color(0xFFf9fafb)
+val light_theme_onSecondary = Color(0xFF4f39f6)
+val light_theme_tertiary = Color(0xFF6a7282)
 
-val LightGrayBackground = Color(0xFFF3F4F6)
-val Secondary = Color(0xFFf9fafb)
-val onPrimary = Color(0xFF4f39f6)
-val labelText = Color(0xFF6a7282)
+val dark_theme_primary = Color.Black
+val dark_theme_onPrimary = Color.White
+val dark_theme_secondary = Color(0xFF060507)
+val dark_theme_onSecondary = Color(0xFFB0C609)
+val dark_theme_tertiary = Color(0xFF959D7D)
 
-val GreenColor = Color(0xFF00a63e)
-val RedColor = Color(0xFFe7000b)
-val TertiaryText = Color(0xFF4f39f6)
+
+val positiveGrowthTextColor = Color(0xFF00a63e)
+val negativeGrowthTextColor = Color(0xFFe7000b)
+
 
