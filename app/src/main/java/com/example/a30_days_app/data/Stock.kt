@@ -13,8 +13,6 @@ data class Stock(
     @StringRes val titleId: Int,
     @DrawableRes val imageResourceId: Int,
     @StringRes val descriptionId: Int,
-//    var priceToday: Double? = null,
-//    var growth: Double? = null
 ) {
     var priceToday by mutableStateOf<Double?>(null)
     var growth by mutableStateOf<Double?>(null)

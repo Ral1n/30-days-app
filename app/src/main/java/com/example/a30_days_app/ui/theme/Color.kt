@@ -11,9 +11,9 @@ val light_theme_secondary = Color(0xFFf9fafb)
 val light_theme_onSecondary = Color(0xFF4f39f6)
 val light_theme_tertiary = Color(0xFF6a7282)
 
-val dark_theme_primary = Color.Black
+val dark_theme_primary = Color(0xFF060507)
 val dark_theme_onPrimary = Color.White
-val dark_theme_secondary = Color(0xFF060507)
+val dark_theme_secondary = Color.Black
 val dark_theme_onSecondary = Color(0xFF4f39f6)
 val dark_theme_tertiary = Color(0xFFB0B3B8)
 

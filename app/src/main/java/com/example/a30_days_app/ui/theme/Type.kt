@@ -1,9 +1,6 @@
 package com.example.a30_days_app.ui.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.fontResource
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -40,37 +37,26 @@ val Typography = Typography(
     */
 )
 
-val BebasNeue = FontFamily(
-    Font(R.font.bebas_neue_regular)
-)
+//@OptIn(ExperimentalTextApi::class)
+//val montserratFamily = FontFamily(
+//    Font(
+//        R.font.montserrat,
+//        weight = FontWeight.ExtraBold,
+//        variationSettings = FontVariation.Settings(
+//            FontVariation.weight(800)
+//        )
+//    ),
+//
+//    Font(
+//        R.font.montserrat,
+//        weight = FontWeight.ExtraLight,
+//        variationSettings = FontVariation.Settings(
+//            FontVariation.weight(100)
+//        )
+//    )
+//)
 
-val Monda = FontFamily(
-    Font(R.font.monda_variable_font_wght)
-)
-
-val GoogleSans = FontFamily(
-    Font(R.font.google_sans_code)
-)
-
-@OptIn(ExperimentalTextApi::class)
-val montserratFamily = FontFamily(
-    Font(
-        R.font.montserrat,
-        weight = FontWeight.ExtraBold,
-        variationSettings = FontVariation.Settings(
-            FontVariation.weight(800)
-        )
-    ),
-
-    Font(
-        R.font.montserrat,
-        weight = FontWeight.ExtraLight,
-        variationSettings = FontVariation.Settings(
-            FontVariation.weight(100)
-        )
-    )
-)
-
+// I used only one font because i liked it a lot and thought it fit well with all the text in my app
 @OptIn(ExperimentalTextApi::class)
 val interFamily = FontFamily(
     Font(
@@ -112,11 +98,4 @@ val interFamily = FontFamily(
             FontVariation.weight(800)
         )
     )
-
-
 )
-
-//val Monserrat = FontFamily(
-//    Font(R.font.montserrat, FontWeight.Light),
-//    Font(R.font.montserrat, FontWeight.SemiBold),
-////            Font(R.font.montserrat, weight = FontWeight.ExtraBold)

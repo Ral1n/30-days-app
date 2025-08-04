@@ -1,22 +1,14 @@
 package com.example.a30_days_app
 
-import android.content.ClipDescription
-import android.icu.util.Calendar
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.StringRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,7 +29,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,8 +38,6 @@ import androidx.compose.ui.unit.sp
 import com.example.a30_days_app.data.Stock
 import com.example.a30_days_app.ui.theme._30daysappTheme
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -57,25 +46,15 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Label
 import androidx.compose.material3.Surface
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.layout.ModifierInfo
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.res.dimensionResource
 import com.example.a30_days_app.data.stocks
-import com.example.a30_days_app.ui.theme.dark_theme_primary
 import com.example.a30_days_app.ui.theme.interFamily
+import com.example.a30_days_app.ui.theme.negativeGrowthTextColor
 import com.example.a30_days_app.ui.theme.positiveGrowthTextColor
 import kotlinx.coroutines.delay
-import retrofit2.http.Tag
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,14 +79,12 @@ fun StockOfTheDayApp(modifier: Modifier = Modifier) {
     LaunchedEffect(Unit) {
         for (stock in stocks) {
             stock.priceToday = getStockPriceToday(stock)
-            Log.d("STOCK", "priceToday: ${stock.priceToday}")
-            delay(1000L)
+            delay(1000)
             stock.growth = calculateGrowthOver5y(stock)
-            Log.d("STOCK", "5yAgoPrice: ${stock.growth}")
-            delay(2000L)
+            delay(1000)
+            // I added 1 sec delays to make sure the app doesnt exceed the API limit of 5 requests per sec
         }
     }
-    Log.d("STOCK", "1: ${stocks.first().symbol} \n ${stocks.first().priceToday}")
 
     Scaffold(
         topBar = {
@@ -118,14 +95,14 @@ fun StockOfTheDayApp(modifier: Modifier = Modifier) {
             items(stocks) {
                 StockCard(
                     stock = it,
-                    modifier = Modifier.padding(4.dp)
+                    modifier = Modifier.padding(dimensionResource(R.dimen.padding_small))
                 )
             }
         }
     }
 }
 
-suspend fun getStockPriceToday(stock: Stock): Double? {
+private suspend fun getStockPriceToday(stock: Stock): Double? {
     val response = StockApiPriceToday.priceTodayStockService.getStock(
         symbol = stock.symbol,
         apikey = "MZtuw0KjRdgz4LW7lyunuYzvdgsfWH3t"
@@ -134,15 +111,16 @@ suspend fun getStockPriceToday(stock: Stock): Double? {
     return response.firstOrNull()?.price
 }
 
-suspend fun calculateGrowthOver5y(stock: Stock): Double? {
+private suspend fun calculateGrowthOver5y(stock: Stock): Double? {
     val response = StockApiPrice5yAgo.price5yAgoStockService.getStock(
         symbol = stock.symbol,
         apikey = "MZtuw0KjRdgz4LW7lyunuYzvdgsfWH3t"
     )
 
     val stockPriceToday: Double = getStockPriceToday(stock)!!
-    val stockPrice5yAgo: Double = response.lastOrNull()!!.price
 
+    // Last element in this api call is exactly the stock 5y ago
+    val stockPrice5yAgo: Double = response.lastOrNull()!!.price
 
     val growthPercentage = (stockPriceToday - stockPrice5yAgo) * 100 / stockPrice5yAgo
 
@@ -162,7 +140,10 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp, 8.dp)
+            .padding(
+                dimensionResource(R.dimen.padding_big),
+                dimensionResource(R.dimen.padding_medium)
+            )
     ) {
         Column(
             modifier = Modifier.animateContentSize(
@@ -175,7 +156,10 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(16.dp, 8.dp)
+                modifier = Modifier.padding(
+                    dimensionResource(R.dimen.padding_big),
+                    dimensionResource(R.dimen.padding_medium)
+                )
             ) {
                 Text(
                     text = stringResource(stock.titleId),
@@ -202,7 +186,7 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(dimensionResource(R.dimen.padding_medium))
             ) {
                 Spacer(modifier = Modifier.weight(1f))
 
@@ -210,8 +194,8 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                     painter = painterResource(stock.imageResourceId),
                     contentDescription = null,
                     modifier = Modifier
-                        .size(width = 96.dp, height = 96.dp)
-                        .padding(4.dp)
+                        .size(dimensionResource(R.dimen.image_size))
+                        .padding(dimensionResource(R.dimen.padding_small))
                 )
 
                 Column(
@@ -265,18 +249,33 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                                 modifier = Modifier
                             )
 
-                            Text(
-                                text = if (stock.growth == null) {
-                                    "..."
-                                } else {
-//                                    "+${stock.growth}%"
-                                    String.format("+%.2f%%", stock.growth)
-                                },
-                                fontFamily = interFamily,
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 20.sp,
-                                color = positiveGrowthTextColor
-                            )
+                            val stockGrowth = stock.growth
+
+                            if (stockGrowth == null) {
+                                Text(
+                                    text = "...",
+                                    fontFamily = interFamily,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 20.sp,
+                                    color = MaterialTheme.colorScheme.onSecondary,
+                                )
+                            } else if (stockGrowth < 0) {
+                                Text(
+                                    text = String.format("%.2f%%", stockGrowth),
+                                    fontFamily = interFamily,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 20.sp,
+                                    color = negativeGrowthTextColor
+                                )
+                            } else {
+                                Text(
+                                    text = String.format("+%.2f%%", stockGrowth),
+                                    fontFamily = interFamily,
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 20.sp,
+                                    color = positiveGrowthTextColor
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.weight(1f))
@@ -295,10 +294,8 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                     )
                 }
 
-
                 Spacer(modifier = Modifier.weight(1f))
             }
-
 
             Surface(
                 color = MaterialTheme.colorScheme.secondary,
@@ -314,7 +311,10 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                             fontWeight = FontWeight.Medium,
                             fontSize = 14.sp,
                             color = MaterialTheme.colorScheme.onSecondary,
-                            modifier = Modifier.padding(16.dp, 8.dp)
+                            modifier = Modifier.padding(
+                                dimensionResource(R.dimen.padding_big),
+                                dimensionResource(R.dimen.padding_medium)
+                            )
                         )
 
                         Spacer(modifier = Modifier.weight(1f))
@@ -347,9 +347,9 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                             color = MaterialTheme.colorScheme.tertiary,
                             modifier = Modifier.padding(
                                 top = 0.dp,
-                                bottom = 16.dp,
-                                start = 16.dp,
-                                end = 16.dp
+                                bottom = dimensionResource(R.dimen.padding_big),
+                                start = dimensionResource(R.dimen.padding_big),
+                                end = dimensionResource(R.dimen.padding_big)
                             )
                         )
                     }
@@ -391,7 +391,7 @@ fun AppTopBar(modifier: Modifier = Modifier) {
             colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.background
             ),
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier.padding(top = dimensionResource(R.dimen.padding_big))
         )
     }
 }
@@ -406,12 +406,12 @@ fun LightStockOfTheDayAppPreview() {
     }
 }
 
-//@Preview
-//@Composable
-//fun DarkStockOfTheDayAppPreview() {
-//    _30daysappTheme(
-//        darkTheme = true,
-//    ) {
-//        StockOfTheDayApp()
-//    }
-//}
+@Preview
+@Composable
+fun DarkStockOfTheDayAppPreview() {
+    _30daysappTheme(
+        darkTheme = true,
+    ) {
+        StockOfTheDayApp()
+    }
+}
