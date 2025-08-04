@@ -61,7 +61,9 @@ import androidx.compose.material3.Label
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.layout.ModifierInfo
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
@@ -94,6 +96,19 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun StockOfTheDayApp(modifier: Modifier = Modifier) {
+
+    LaunchedEffect(Unit) {
+        for (stock in stocks) {
+            stock.priceToday = getStockPriceToday(stock)
+            Log.d("STOCK", "priceToday: ${stock.priceToday}")
+            delay(1000L)
+            stock.growth = calculateGrowthOver5y(stock)
+            Log.d("STOCK", "5yAgoPrice: ${stock.growth}")
+            delay(2000L)
+        }
+    }
+    Log.d("STOCK", "1: ${stocks.first().symbol} \n ${stocks.first().priceToday}")
+
     Scaffold(
         topBar = {
             AppTopBar()
@@ -110,42 +125,33 @@ fun StockOfTheDayApp(modifier: Modifier = Modifier) {
     }
 }
 
-suspend fun getStockPriceToday(stock: Stock): String? {
+suspend fun getStockPriceToday(stock: Stock): Double? {
     val response = StockApiPriceToday.priceTodayStockService.getStock(
         symbol = stock.symbol,
         apikey = "MZtuw0KjRdgz4LW7lyunuYzvdgsfWH3t"
     )
 
-    return String.format("%.2f", response.firstOrNull()?.price)
+    return response.firstOrNull()?.price
 }
 
-suspend fun calculateGrowthOver5y(stock: Stock): String? {
+suspend fun calculateGrowthOver5y(stock: Stock): Double? {
     val response = StockApiPrice5yAgo.price5yAgoStockService.getStock(
         symbol = stock.symbol,
         apikey = "MZtuw0KjRdgz4LW7lyunuYzvdgsfWH3t"
     )
 
-    val stockPriceToday: Double = getStockPriceToday(stock)!!.toDouble()
+    val stockPriceToday: Double = getStockPriceToday(stock)!!
     val stockPrice5yAgo: Double = response.lastOrNull()!!.price
-    Log.d("STOCK", "5yAgoPrice: $stockPrice5yAgo")
+
 
     val growthPercentage = (stockPriceToday - stockPrice5yAgo) * 100 / stockPrice5yAgo
 
-    return String.format("%.2f", growthPercentage)
+    return growthPercentage
 }
 
 @Composable
 fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
-    var stockPriceToday by remember { mutableStateOf<String?>("") }
-    var stockGrowthOver5y by remember { mutableStateOf<String?>("") }
-
     var expanded by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        stockPriceToday = getStockPriceToday(stock)
-        delay(1000)
-        stockGrowthOver5y = calculateGrowthOver5y(stock)
-    }
 
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
@@ -232,10 +238,10 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                             )
 
                             Text(
-                                text = if (stockPriceToday.isNullOrEmpty()) {
+                                text = if (stock.priceToday == null) {
                                     "..."
                                 } else {
-                                    "$${stockPriceToday}"
+                                    String.format("$%.2f", stock.priceToday)
                                 },
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.SemiBold,
@@ -260,10 +266,11 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                             )
 
                             Text(
-                                text = if (stockGrowthOver5y.isNullOrEmpty()) {
+                                text = if (stock.growth == null) {
                                     "..."
                                 } else {
-                                    "+$stockGrowthOver5y%"
+//                                    "+${stock.growth}%"
+                                    String.format("+%.2f%%", stock.growth)
                                 },
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.SemiBold,
@@ -355,34 +362,38 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppTopBar(modifier: Modifier = Modifier) {
-    CenterAlignedTopAppBar(
-        title = {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    text = "STOCK OF THE DAY",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 28.sp,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
+    Surface(
+        color = MaterialTheme.colorScheme.background
+    ) {
+        CenterAlignedTopAppBar(
+            title = {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = "STOCK OF THE DAY",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontSize = 28.sp,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                    )
 
-                Text(
-                    text = "Five years can change everything. Start today.",
-                    fontFamily = interFamily,
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.tertiary,
-                )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.background
-        ),
-        modifier = Modifier.padding(top = 16.dp)
-    )
+                    Text(
+                        text = "Five years can change everything. Start today.",
+                        fontFamily = interFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.tertiary,
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.background
+            ),
+            modifier = Modifier.padding(top = 16.dp)
+        )
+    }
 }
 
 @Preview
@@ -395,12 +406,12 @@ fun LightStockOfTheDayAppPreview() {
     }
 }
 
-@Preview
-@Composable
-fun DarkStockOfTheDayAppPreview() {
-    _30daysappTheme(
-        darkTheme = true,
-    ) {
-        StockOfTheDayApp()
-    }
-}
+//@Preview
+//@Composable
+//fun DarkStockOfTheDayAppPreview() {
+//    _30daysappTheme(
+//        darkTheme = true,
+//    ) {
+//        StockOfTheDayApp()
+//    }
+//}

@@ -19,7 +19,6 @@ interface Price5yAgoStockService {
     @GET("historical-price-eod/light")
     suspend fun getStock(
         @Query("symbol") symbol: String,
-//        @Query("from") from: String,
         @Query("apikey") apikey: String,
     ): List<Price5yAgoStockResponse>
 }
