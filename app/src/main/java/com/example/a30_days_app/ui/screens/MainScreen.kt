@@ -54,7 +54,6 @@ import com.example.a30_days_app.ui.theme._30daysappTheme
 import com.example.a30_days_app.ui.theme.interFamily
 import com.example.a30_days_app.ui.theme.negativeGrowthTextColor
 import com.example.a30_days_app.ui.theme.positiveGrowthTextColor
-import com.example.a30_days_app.viewmodel.StockUiState
 import com.example.a30_days_app.viewmodel.StockViewModel
 import kotlinx.coroutines.delay
 

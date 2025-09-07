@@ -27,7 +27,7 @@ import com.example.a30_days_app.ui.theme.interFamily
 import com.example.a30_days_app.viewmodel.StockViewModel
 
 @Composable
-fun StockOfTheDayApp(modifier: Modifier = Modifier) {
+fun StockOfTheDayApp() {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
@@ -50,12 +50,8 @@ fun StockOfTheDayApp(modifier: Modifier = Modifier) {
     }
 }
 
-
 @Composable
-fun StockTopAppBar(
-    scrollBehavior: TopAppBarScrollBehavior,
-    modifier: Modifier = Modifier
-) {
+fun StockTopAppBar(scrollBehavior: TopAppBarScrollBehavior) {
     Surface(
         color = MaterialTheme.colorScheme.background
     ) {
