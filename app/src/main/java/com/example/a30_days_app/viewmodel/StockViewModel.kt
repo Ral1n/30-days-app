@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.a30_days_app.BuildConfig.API_KEY
+import com.example.a30_days_app.BuildConfig
 import com.example.a30_days_app.StockApplication
 import com.example.a30_days_app.data.Stock
 import com.example.a30_days_app.data.StockRepository
@@ -27,11 +27,11 @@ class StockViewModel(private val stockRepository: StockRepository) : ViewModel()
             val updatedStocks = stocks.map { stock ->
                 val priceToday = stockRepository.getStockPriceToday(
                     stock.symbol,
-                    API_KEY
+                    BuildConfig.API_KEY
                 )
                 val price5yAgo = stockRepository.getStockPrice5yAgo(
                     stock.symbol,
-                    API_KEY
+                    BuildConfig.API_KEY
                 )
 
                 if (priceToday != null && price5yAgo != null) {
