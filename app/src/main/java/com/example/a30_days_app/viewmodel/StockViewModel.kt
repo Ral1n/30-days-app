@@ -1,6 +1,7 @@
 package com.example.a30_days_app.viewmodel
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -12,36 +13,46 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.network.HttpException
 import com.example.a30_days_app.StockApplication
+import com.example.a30_days_app.data.Stock
 import com.example.a30_days_app.data.StockRepository
+import com.example.a30_days_app.data.stocks
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import okhttp3.Call
 import okio.IOException
+import javax.sql.DataSource
 
 class StockViewModel(private val stockRepository: StockRepository) : ViewModel() {
-    var stockUiState: StockUiState by mutableStateOf(StockUiState.Loading)
-        private set
+    val stockUiState = MutableStateFlow<List<Stock>>(emptyList())
 
     init {
-        val symbols = stockRepository.getAllSymbols()
-        symbols.forEach {
-            getStocks(it)
-        }
+        getStocksPricesAndGrowths()
     }
 
-    private val apikey: String = "MZtuw0KjRdgz4LW7lyunuYzvdgsfWH3t"
+//    val apikey: String = "MZtuw0KjRdgz4LW7lyunuYzvdgsfWH3t"
 
-    fun getStocks(symbol: String) {
+    fun getStocksPricesAndGrowths() {
         viewModelScope.launch {
-            stockUiState = StockUiState.Loading
-            stockUiState = try {
-                val pricesToday = stockRepository.getStocksPricesToday(symbol, apikey)
-                val prices5yAgo = stockRepository.getStocksPrices5yAgo(symbol, apikey)
-                StockUiState.Success(pricesToday, prices5yAgo)
-            } catch (e: IOException) {
-                StockUiState.Error
-            } catch (e: HttpException) {
-                StockUiState.Error
+            val updatedStocks = stocks.map { stock ->
+                val priceToday = stockRepository.getStockPriceToday(
+                    stock.symbol,
+                    "MZtuw0KjRdgz4LW7lyunuYzvdgsfWH3t"
+                )
+                val price5yAgo = stockRepository.getStockPrice5yAgo(
+                    stock.symbol,
+                    "MZtuw0KjRdgz4LW7lyunuYzvdgsfWH3t"
+                )
+
+                if (priceToday != null && price5yAgo != null) {
+                    stock.copy(
+                        priceToday = mutableDoubleStateOf(priceToday.price),
+                        growth = mutableDoubleStateOf((priceToday.price - price5yAgo.price) * 100 / price5yAgo.price)
+                    )
+                } else {
+                    stock
+                }
             }
+
+            stockUiState.value = updatedStocks
         }
     }
 

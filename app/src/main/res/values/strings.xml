@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">30-days-app</string>
+    <string name="loading">Loading…</string>
+    <string name="error">An error occurred.</string>
 
     <string name="stock_title1">Alphabet Inc.</string>
     <string name="stock_title2">Apple Inc.</string>

@@ -6,15 +6,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class StockPrice(
     @SerialName(value = "price")
-    val price: Int
+    val price: Double
 )
-
-//data class StockPriceToday(
-//    @SerialName(value = "price")
-//    val price: Int
-//)
-//
-//data class StockPrice5yAgo(
-//    @SerialName(value = "price")
-//    val price: Int
-//)

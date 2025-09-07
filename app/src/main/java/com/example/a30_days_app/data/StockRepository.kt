@@ -1,26 +1,25 @@
 package com.example.a30_days_app.data
 
+import android.util.Log
 import coil.decode.DataSource
 import com.example.a30_days_app.model.StockPrice
 import com.example.a30_days_app.network.StockApiService
 
 interface StockRepository {
-    suspend fun getStocksPricesToday(symbol: String, apikey: String): List<StockPrice>
-    suspend fun getStocksPrices5yAgo(symbol: String, apikey: String): List<StockPrice>
-
-    fun getAllSymbols(): List<String> {
-        return stocks.map { it.symbol }
-    }
+    suspend fun getStockPriceToday(symbol: String, apikey: String): StockPrice?
+    suspend fun getStockPrice5yAgo(symbol: String, apikey: String): StockPrice?
 }
 
 class NetworkStockRepository(
     private val stockApiService: StockApiService
 ) : StockRepository {
-    override suspend fun getStocksPricesToday(symbol: String, apikey: String): List<StockPrice> {
-        return stockApiService.getStockPriceToday(symbol, apikey)
+    override suspend fun getStockPriceToday(symbol: String, apikey: String): StockPrice? {
+        Log.d("TEST", "Requesting price for symbol: $symbol with apikey: $apikey")
+        return stockApiService.getStockPriceToday(symbol, apikey).firstOrNull()
     }
 
-    override suspend fun getStocksPrices5yAgo(symbol: String, apikey: String): List<StockPrice> {
-        return stockApiService.getStockPrice5yAgo(symbol, apikey)
+    override suspend fun getStockPrice5yAgo(symbol: String, apikey: String): StockPrice? {
+        Log.d("TEST", "Requesting price for symbol: $symbol with apikey: $apikey")
+        return stockApiService.getStockPrice5yAgo(symbol, apikey).lastOrNull()
     }
 }
