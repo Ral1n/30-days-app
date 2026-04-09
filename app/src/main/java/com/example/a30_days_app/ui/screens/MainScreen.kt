@@ -18,19 +18,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,38 +45,32 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.a30_days_app.R
 import com.example.a30_days_app.data.Stock
-import com.example.a30_days_app.data.stocks
-import com.example.a30_days_app.model.StockPrice
 import com.example.a30_days_app.ui.theme._30daysappTheme
 import com.example.a30_days_app.ui.theme.interFamily
 import com.example.a30_days_app.ui.theme.negativeGrowthTextColor
 import com.example.a30_days_app.ui.theme.positiveGrowthTextColor
+import com.example.a30_days_app.viewmodel.StockUiState
 import com.example.a30_days_app.viewmodel.StockViewModel
-import kotlinx.coroutines.delay
-
+import java.util.Locale
 
 @Composable
 fun MainScreen(
-    viewModel: StockViewModel = viewModel(),
+    viewModel: StockViewModel = viewModel(factory = StockViewModel.Factory),
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
-    val stocks by viewModel.stockUiState.collectAsState()
-    StockCardsScreen(stocks = stocks, modifier = modifier.padding(contentPadding))
-//    when (stockUiState) {
-//        is StockUiState.Loading -> LoadingScreen(
-//            modifier = modifier.fillMaxWidth()
-//        )
-//
-//        is StockUiState.Success -> StockCardsScreen(
-//            stocks = stockUiState.stocks,
-//            modifier = modifier.padding(contentPadding)
-//        )
-//
-//        is StockUiState.Error -> ErrorScreen(
-//            modifier = modifier.fillMaxWidth()
-//        )
-//    }
+    val stockUiState by viewModel.stockUiState.collectAsState()
+    when (stockUiState) {
+        is StockUiState.Loading -> LoadingScreen(modifier = modifier.fillMaxWidth())
+        is StockUiState.Success -> StockCardsScreen(
+            stocks = (stockUiState as StockUiState.Success).stocks,
+            modifier = modifier.padding(contentPadding)
+        )
+        is StockUiState.Error -> ErrorScreen(
+            onRetry = viewModel::loadStocks,
+            modifier = modifier.fillMaxWidth()
+        )
+    }
 }
 
 @Composable
@@ -104,7 +95,7 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ErrorScreen(modifier: Modifier = Modifier) {
+fun ErrorScreen(onRetry: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -121,6 +112,9 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
             fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.onBackground
         )
+        Button(onClick = onRetry) {
+            Text(text = "Retry")
+        }
     }
 }
 
@@ -134,7 +128,7 @@ fun StockCardsScreen(
             contentPadding = it,
             modifier = modifier
         ) {
-            items(stocks) { stock ->
+            items(items = stocks, key = { it.symbol }) { stock ->
                 StockCard(
                     stock = stock,
                     modifier = Modifier.padding(dimensionResource(R.dimen.padding_small))
@@ -239,10 +233,10 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                             )
 
                             Text(
-                                text = if (stock.priceToday == null) {
+                                text = if (stock.priceToday == 0.0) {
                                     "..."
                                 } else {
-                                    String.format("$%.2f", stock.priceToday.value)
+                                    String.format(Locale.US, "$%.2f", stock.priceToday)
                                 },
                                 fontFamily = interFamily,
                                 fontWeight = FontWeight.SemiBold,
@@ -268,17 +262,9 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
 
                             val stockGrowth = stock.growth
 
-                            if (stockGrowth == null) {
+                            if (stockGrowth == 0.0) {
                                 Text(
-                                    text = "...",
-                                    fontFamily = interFamily,
-                                    fontWeight = FontWeight.SemiBold,
-                                    fontSize = 20.sp,
-                                    color = MaterialTheme.colorScheme.onSecondary,
-                                )
-                            } else if (stockGrowth.value < 0) {
-                                Text(
-                                    text = String.format("%.2f%%", stockGrowth.value),
+                                    text = String.format(Locale.US, "%.2f%%", stockGrowth),
                                     fontFamily = interFamily,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 20.sp,
@@ -286,7 +272,7 @@ fun StockCard(stock: Stock, modifier: Modifier = Modifier) {
                                 )
                             } else {
                                 Text(
-                                    text = String.format("+%.2f%%", stockGrowth.value),
+                                    text = String.format(Locale.US, "+%.2f%%", stockGrowth),
                                     fontFamily = interFamily,
                                     fontWeight = FontWeight.SemiBold,
                                     fontSize = 20.sp,
